@@ -19,17 +19,32 @@
 <div id="container"></div>
 <script>
 
-
     var selected;
-
     var lastx ;
     var lasty ;
-
     var globalEvent;
-
     var globalConnectors = new Array();
-
     var connections = new Array();
+
+    var menuImageSources = ["img/resize.png", "img/resize.png", "img/resize.png"]
+    var menuImages = [];
+
+
+    function showMenu(mx,my) {
+        for(s in menuImages) {
+            var image = menuImages[s];
+            image.setAttrs({x:mx, y:my, visible: true});
+            image.draw();
+        }
+    }
+
+    function hideMenu() {
+        for(s in menuImages) {
+            var image = menuImages[s];
+            image.setAttrs({visible: false});
+        }
+        layer.draw();
+    }
 
     function distance(x1,y1,x2,y2) {
         return Math.sqrt((x2 -= x1) * x2 + (y2 -= y1) * y2);
@@ -92,8 +107,6 @@
         var Xb = nx;
         var Yb = ny;
 
-
-
         var AB = math.sqrt((Xb - Xa)*(Xb - Xa) + (Yb - Ya)*(Yb - Ya));
         var AC = math.max(w,h)*2;
 
@@ -128,62 +141,31 @@
             draggable: false
         });
 
-        /*
-        var a1 = new Konva.Circle({
-            x: hw,
-            y: 0,
-            stroke: '#666',
-            fill: '#ddd',
-            strokeWidth: 2,
-            radius: 8,
-            name: 'top',
-            draggable: false,
-            dragOnTop: false
-        });
+        group.add(rect);
 
-        var a4 = new Konva.Circle({
-            x: w,
-            y: hh,
-            stroke: '#666',
-            fill: '#ddd',
-            strokeWidth: 2,
-            radius: 8,
-            name: 'right',
-            draggable: true,
-            dragOnTop: false
 
-        });
-
-        var a3 = new Konva.Circle({
-            x: hw,
-            y: h,
-            stroke: '#666',
-            fill: '#ddd',
-            strokeWidth: 2,
-            radius: 8,
-            name: 'bottom',
-            draggable: false,
-            dragOnTop: false
-        });
-
-        var a2 = new Konva.Circle({
+        var complexText = new Konva.Text({
             x: 0,
-            y: hh,
-            stroke: '#666',
-            fill: '#ddd',
-            strokeWidth: 2,
-            radius: 8,
-            name: 'left',
-            draggable: false,
-            dragOnTop: false
+            y: 0,
+            text: 'COMPLEX TEXT\nAll the world\'s a stage, and all the men and women merely players. They have their exits and their entrances.',
+            fontSize: 18,
+            fontFamily: 'Calibri',
+            fill: '#555',
+            width: w,
+            height: h,
+            padding: 5,
+            align: 'center',
+            listening: false
         });
-        */
 
-
-
-
+        group.add(complexText);
 
         rect.on('dblclick', function(evt) {
+
+            // compensate onclick changes
+            hideMenu();
+            rect.setAttr("fill",'#00D2FF');
+
             var ax = rect.getAbsolutePosition().x;
             var ay = rect.getAbsolutePosition().y;
 
@@ -206,22 +188,6 @@
 
             rect.connectors.push(pointer);
 
-
-            /* Move around rectangle
-            pointer.on('dragmove', function(evt) {
-                var ax = rect.getAbsolutePosition().x;
-                var ay = rect.getAbsolutePosition().y;
-
-                var points = findOnRectPoint(evt.evt.x -ax, evt.evt.y-ay, rect, clickline);
-
-                pointer.setAttr("x", points.x);
-                pointer.setAttr("y", points.y);
-
-                layer.draw();
-
-            });
-            */
-
             pointer.on('mousedown', function(evt) {
                 lastx =  pointer.getAttr("x");
                 lasty =  pointer.getAttr("y");
@@ -241,8 +207,6 @@
                 globalEvent = evt.evt;
                 evt.cancelBubble = true;
             });
-
-
 
             pointer.on('dragmove', function(evt) {
 
@@ -319,7 +283,6 @@
 
             globalConnectors.push(pointer);
 
-            //group.setAttrs({x: 100, y: 100});
 
             layer.add(group);
 
@@ -327,101 +290,29 @@
 
         });
 
+        rect.on('click', function(evt) {
 
-
-
-
-        /*
-        a4.on('dragstart', function(evt) {
-            a4.setAttr("x", lastx);
-            a4.setAttr("y", lasty);
-            //a4.stopDrag();
-            pointer.show();
-            arrow.show();
-
-        });
-
-        pointer.on('dragmove', function(evt) {
-
-            console.log("drag new pointer");
-
-            var ax = rect.getAbsolutePosition().x;
-            var ay = rect.getAbsolutePosition().y;
-
-            var points = findOnRectPoint(evt.evt.x -ax, evt.evt.y-ay, rect, clickline);
-
-            a4.setAttr("x", points.x);
-            a4.setAttr("y", points.y);
-
-        });
-
-
-        a4.on('dragmove', function(evt) {
-            a4.setAttr("x", lastx);
-            a4.setAttr("y", lasty);
-            //a4.stopDrag();
-
-            pointer.setAttrs({x: evt.evt.x, y: evt.evt.y});
-
-            ax = evt.evt.x - lastx ;
-            ay = evt.evt.y - lasty ;
-
-            arrow.setAttrs({x:lastx,y:lasty, points:[group.getAttr("x"),group.getAttr("y"),ax,ay]});
-
-        });
-
-        a4.on('dragend', function(evt) {
-            a4.setAttr("x", lastx);
-            a4.setAttr("y", lasty);
-            //a4.stopDrag();
-
-            pointer.hide();
-            layer.draw();
-        });
-
-        a4.on("mousedown", function(evt) {
-            lastx =  a4.getAttr("x");
-            lasty =  a4.getAttr("y");
-            console.log("x "+lastx);
-            console.log("y "+lasty);
-
-        });
-
-        a4.on("mouseup", function(evt) {
-            console.log("circle click");
-        });
-
-        group.on("click", function(evt) {
-            console.log("group click");
-
-        });
-
-        layer.on("mouseup", function(evt) {
-            console.log("layer mouseup");
-
-        });
-
-        group.on("dragmove", function(evt){
-
-            var c = this.connectors;
-
-            if(c) {
-                for(i=0; i<c.length; i++) {
-                    if(c[i].connectTo) {
-                        setupArrow(c[i], c[i].connectTo, c[i].connector);
-                    }
-
-                    if(c[i].connectFrom) {
-                        setupArrow(c[i].connectFrom, c[i], c[i].connector);
-                    }
-                }
+            if(selected) {
+                selected.deselect();
             }
+            selected = rect;
 
+            rect.setAttr("fill",'#D200FF');
+            layer.draw();
+
+            globalEvent = evt.evt;
+            evt.cancelBubble = true;
+
+            showMenu(rect.getAbsolutePosition().x + rect.getAttr("width") + 2, rect.getAbsolutePosition().y - 40);
         });
 
-        */
+        rect.deselect = function() {
+            hideMenu();
+            rect.setAttr("fill",'#00D2FF');
+            layer.draw();
+        };
 
-        group.add(rect);
+
         //group.add(pointer);
         //group.add(clickline);
 
@@ -434,6 +325,10 @@
         //layer.add(pointer);
 
         layer.add(group);
+
+        group.on('dragstart', function(evt) {
+            hideMenu();
+        });
 
         group.on('dragmove', function(evt) {
             console.log("drag rect");
@@ -492,6 +387,8 @@
             if (selected) {
                 selected.deselect();
                 selected = null;
+
+                hideMenu();
             }
         } else {
 
@@ -541,7 +438,7 @@
         });
 
         image.on('click', function(evt) {
-            alert("ha");
+
         });
 
         // append to layer
@@ -549,6 +446,33 @@
         // update layer
         layer.draw();
     });
+
+
+
+
+
+    for(s in menuImageSources) {
+
+        Konva.Image.fromURL(menuImageSources[s], function(image) {
+            // make it draggable
+            image.setAttrs({
+                draggable: false,
+                x: 0,
+                y: 0,
+                width: 40,
+                height: 40,
+                visible: false
+            });
+
+            menuImages.push(image);
+            layer.add(image);
+            layer.draw();
+
+        });
+    }
+
+
+
 
 
 
